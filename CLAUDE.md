@@ -43,11 +43,23 @@ node tools/test-cfx-refresh.js
 
 Both must exit 0 before tagging a release.
 
+`tools/test-routing.md` is the Layer 1 behavioral routing specification — 71 expected behaviors covering trigger tests, boundary tests, Iron Law temptation tests, and cross-skill disambiguation. It is a human-readable spec, not an executable script. Execution requires a live Claude Code session with the plugin loaded; results are recorded in `tools/routing-results/YYYY-MM-DD-vX.Y.Z.md`. **Never modify `test-routing.md` to match observed behavior — update the results file first, then diagnose separately.**
+
 ## Architecture
 
 Skills are discovered by Claude Code at session start from the `skills/` directory. Each subdirectory name must match the `name:` field in its SKILL.md — `validate-pack.js` enforces this. Claude Code reads a skill's SKILL.md only when a user message matches its `description:` field; the body (Iron Law, Red Flags table, workflow) is the instruction set executed after loading.
 
 The `cfx-refresh` skill is special: it reads `last-verified` and `volatility` from its 10 siblings, computes staleness against threshold tables, and WebFetches the GitHub API for oxmysql and txAdmin releases. Its algorithm is separately tested in `test-cfx-refresh.js` with a fixed `NOW` constant so assertions never rot as real time advances.
+
+**Three validation layers:**
+
+| Layer | File | What it tests | Runnable without Claude Code |
+|---|---|---|---|
+| Structural | `tools/validate-pack.js` | Frontmatter fields, name/dir match, valid dates | Yes — `node tools/validate-pack.js` |
+| Algorithmic | `tools/test-cfx-refresh.js` | Staleness algorithm, fetch-failure behavior | Yes — `node tools/test-cfx-refresh.js` |
+| Behavioral | `tools/test-routing.md` | Routing decisions, constraint enforcement, output shape | No — requires live Claude Code session |
+
+Results from live behavioral runs live in `tools/routing-results/`. The spec (`test-routing.md`) and the evidence (results files) are intentionally separate — the spec defines expectations before execution, not after.
 
 ## Frontmatter fields (all required)
 
@@ -83,8 +95,9 @@ Bump `last-verified` only when technical facts were verified against live docs o
 
 1. `node tools/validate-pack.js` — exit 0
 2. `node tools/test-cfx-refresh.js` — exit 0
-3. Promote `[Unreleased]` in `CHANGELOG.md` to `[X.Y.Z] - YYYY-MM-DD`
-4. Bump `version` in `.claude-plugin/plugin.json`
-5. Tag the commit
+3. Ensure `tools/test-routing.md` is committed before running live behavioral tests (spec must predate evidence)
+4. Promote `[Unreleased]` in `CHANGELOG.md` to `[X.Y.Z] - YYYY-MM-DD`
+5. Bump `version` in `.claude-plugin/plugin.json`
+6. Tag the commit; create GitHub release at https://github.com/rolling-codes/cfx-developer-tools
 
 **Version scheme:** patch = content fixes / `last-verified` bumps; minor = new skills or tooling; major = structural overhaul.

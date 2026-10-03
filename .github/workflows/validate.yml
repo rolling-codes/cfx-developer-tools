@@ -1,0 +1,83 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate skill pack
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Validate pack structure
+        run: node tools/validate-pack.js
+
+      - name: Run cfx-refresh algorithm tests
+        run: node tools/test-cfx-refresh.js
+
+      - name: Check plugin.json
+        run: |
+          node -e "
+            const p = JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json', 'utf8'));
+            if (!p.name) throw new Error('plugin.json missing name');
+            if (!p.version) throw new Error('plugin.json missing version');
+            console.log('OK: plugin.json valid, version', p.version);
+          "
+
+      - name: Reject lua54 in templates and examples
+        run: |
+          if grep -rn --include="*.lua" --include="*.js" --include="*.json" \
+               "lua54" templates/ examples/ 2>/dev/null; then
+            echo "ERROR: lua54 found in code file — deprecated directive must not appear in templates or examples"
+            exit 1
+          fi
+          echo "OK: no lua54 in templates or examples"
+
+      - name: Scan for hardcoded credentials
+        run: |
+          FOUND=0
+          while IFS= read -r -d '' file; do
+            if grep -Eiw \
+              'password\s*=\s*"[^"]+"' \
+              "$file" 2>/dev/null \
+              | grep -qiEv '(your_|placeholder|example|changeme|<password>)'; then
+              echo "WARN: possible hardcoded password in $file"
+              FOUND=1
+            fi
+            if grep -Ei \
+              '(api_key|apikey|secret_key|access_token)\s*=\s*"[a-zA-Z0-9_\-]{16,}"' \
+              "$file" 2>/dev/null; then
+              echo "ERROR: possible hardcoded credential in $file"
+              FOUND=1
+            fi
+          done < <(find skills/ templates/ examples/ -name "*.lua" -o -name "*.js" -o -name "*.json" -print0 2>/dev/null)
+          if [ "$FOUND" -ne 0 ]; then exit 1; fi
+          echo "OK: no hardcoded credentials detected"
+
+      - name: Validate fxmanifest templates have required fields
+        run: |
+          ERROR=0
+          while IFS= read -r -d '' f; do
+            if ! grep -q "fx_version" "$f"; then
+              echo "ERROR: $f missing fx_version"
+              ERROR=1
+            fi
+            if ! grep -q "^games" "$f"; then
+              echo "ERROR: $f missing games"
+              ERROR=1
+            fi
+          done < <(find templates/ examples/ -name "fxmanifest.lua" -print0 2>/dev/null)
+          if [ "$ERROR" -ne 0 ]; then exit 1; fi
+          echo "OK: all fxmanifest files have required fields"

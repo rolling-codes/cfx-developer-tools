@@ -1,0 +1,80 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#hud {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 12px;
+    padding: 16px 24px;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#speed-display {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+#speed-value {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+#speed-unit {
+    font-size: 14px;
+    color: #aaa;
+    letter-spacing: 1px;
+}
+
+#gear-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+#gear-label {
+    color: #888;
+    letter-spacing: 1px;
+}
+
+#gear-value {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+#rpm-bar-wrap {
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+#rpm-bar {
+    height: 100%;
+    width: 0%;
+    background: #4fc3f7;
+    border-radius: 2px;
+    transition: width 0.1s linear, background 0.2s;
+}

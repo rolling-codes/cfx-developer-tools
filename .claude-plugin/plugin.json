@@ -1,0 +1,21 @@
+{
+  "name": "cfx-developer-tools",
+  "version": "1.1.0",
+  "description": "Eleven skills for FiveM and RedM (CFX) resource development — scaffolding, client/server patterns, oxmysql, framework detection, fxmanifest, native functions, NUI, performance, state bags, txAdmin, and a freshness-audit skill (cfx-refresh) that checks last-verified dates and upstream oxmysql/txAdmin release tags. Adapted from TMHSDigital/CFX-Developer-Tools through the skill-architect six-gate pipeline.",
+  "author": {
+    "name": "RollingCodes",
+    "url": "https://github.com/rolling-codes"
+  },
+  "license": "MIT",
+  "keywords": [
+    "fivem",
+    "redm",
+    "cfx",
+    "lua",
+    "fxmanifest",
+    "oxmysql",
+    "txadmin",
+    "nui",
+    "gamedev"
+  ]
+}

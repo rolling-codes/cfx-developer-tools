@@ -1,0 +1,15 @@
+{
+  "name": "cfx-developer-tools-local",
+  "owner": {
+    "name": "RollingCodes",
+    "url": "https://github.com/rolling-codes"
+  },
+  "plugins": [
+    {
+      "name": "cfx-developer-tools",
+      "source": "./",
+      "description": "Ten skills for FiveM and RedM resource development — scaffolding, oxmysql, NUI, state bags, txAdmin, performance, and more.",
+      "category": "development"
+    }
+  ]
+}
